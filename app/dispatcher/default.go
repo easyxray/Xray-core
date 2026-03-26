@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/xtls/xray-core/app/proxyman/command/kicker"
 	"github.com/xtls/xray-core/common"
 	"github.com/xtls/xray-core/common/buf"
 	"github.com/xtls/xray-core/common/errors"
@@ -282,6 +283,11 @@ func (d *DefaultDispatcher) Dispatch(ctx context.Context, destination net.Destin
 	if !destination.IsValid() {
 		panic("Dispatcher: Invalid destination.")
 	}
+
+	if sessionInbound := session.InboundFromContext(ctx); sessionInbound != nil && sessionInbound.User != nil && sessionInbound.User.Email != "" {
+		ctx = kicker.Register(sessionInbound.User.Email, ctx)
+	}
+
 	outbounds := session.OutboundsFromContext(ctx)
 	if len(outbounds) == 0 {
 		outbounds = []*session.Outbound{{}}
@@ -339,6 +345,11 @@ func (d *DefaultDispatcher) DispatchLink(ctx context.Context, destination net.De
 	if !destination.IsValid() {
 		return errors.New("Dispatcher: Invalid destination.")
 	}
+
+	if sessionInbound := session.InboundFromContext(ctx); sessionInbound != nil && sessionInbound.User != nil && sessionInbound.User.Email != "" {
+		ctx = kicker.Register(sessionInbound.User.Email, ctx)
+	}
+
 	outbounds := session.OutboundsFromContext(ctx)
 	if len(outbounds) == 0 {
 		outbounds = []*session.Outbound{{}}
