@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/xtls/xray-core/app/commander"
+	"github.com/xtls/xray-core/app/proxyman/command/kicker"
 	"github.com/xtls/xray-core/common"
 	"github.com/xtls/xray-core/common/errors"
 	"github.com/xtls/xray-core/common/protocol"
@@ -62,6 +63,12 @@ func (op *RemoveUserOperation) ApplyInbound(ctx context.Context, handler inbound
 		return errors.New("proxy is not a UserManager")
 	}
 	return um.RemoveUser(ctx, op.Email)
+}
+
+// ApplyInbound implements InboundOperation.
+func (op *KickUserOperation) ApplyInbound(ctx context.Context, handler inbound.Handler) error {
+	kicker.Kick(op.Email)
+	return nil
 }
 
 type handlerServer struct {

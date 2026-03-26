@@ -18,6 +18,10 @@ message RemoveUserOperation {
   string email = 1;
 }
 
+message KickUserOperation {
+  string email = 1;
+}
+
 message AddInboundRequest {
   core.InboundHandlerConfig inbound = 1;
 }
