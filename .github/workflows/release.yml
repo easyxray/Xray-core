@@ -5,6 +5,8 @@ on:
   release:
     types: [published]
   push:
+    tags:
+      - 'v*'
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -256,7 +258,7 @@ jobs:
           cp ${GITHUB_WORKSPACE}/LICENSE ./build_assets/LICENSE
 
       - name: Create ZIP archive
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v')
         shell: bash
         run: |
           pushd build_assets || exit 1
@@ -270,13 +272,24 @@ jobs:
             openssl dgst -$METHOD $FILE | sed 's/([^)]*)//g' >>$DGST
           done
 
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/v') && github.event_name != 'release'
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./Xray-${{ env.ASSET_NAME }}.zip*
-          tag: ${{ github.ref }}
+          tag: ${{ github.ref_name }}
           file_glob: true
 
       - name: Upload files to Artifacts
