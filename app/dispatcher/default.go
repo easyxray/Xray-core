@@ -180,6 +180,8 @@ func (d *DefaultDispatcher) getLink(ctx context.Context) (*transport.Link, *tran
 			}
 		}
 
+		attachUserWireStats(sessionInbound, d.stats, user.Email, p.Stats.UserUplink, p.Stats.UserDownlink)
+
 		if p.Stats.UserOnline {
 			trackOnlineIP(ctx, d.stats, user.Email, sessionInbound.Source.Address.String())
 		}
@@ -214,6 +216,7 @@ func WrapLink(ctx context.Context, policyManager policy.Manager, statsManager st
 				}
 			}
 		}
+		attachUserWireStats(sessionInbound, statsManager, user.Email, p.Stats.UserUplink, p.Stats.UserDownlink)
 		if p.Stats.UserOnline {
 			trackOnlineIP(ctx, statsManager, user.Email, sessionInbound.Source.Address.String())
 		}
